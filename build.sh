@@ -18,7 +18,7 @@ set -eux
 JAVA_HOME=${JAVA_HOME:-/usr/lib/jvm/java}
 CC=${CC:-cc -std=c99}
 CFLAGS=${CFLAGS:--g -Wall -Wextra}
-LDFLAGS=${LDFLAGSS:-}
+LDFLAGS=${LDFLAGS:-}
 
 ${CC} \
     -shared \
