@@ -60,7 +60,7 @@ init(lua_State *L)
   int n = lua_gettop(L) - 1;
   JavaVMOption jvmopt[n];
   for (int i = 0; i < n; i++) {
-    jvmopt[0].optionString = (char *)luaL_checkstring(L, i + 2);
+    jvmopt[i].optionString = (char *)luaL_checkstring(L, i + 2);
   }
 
   JavaVMInitArgs vmArgs;

@@ -23,7 +23,7 @@ if java_home == nil then
 end
 
 -- Initialize JVM
-lujavrite.init(java_home .. "/lib/server/libjvm.so", "-ea")
+lujavrite.init(java_home .. "/lib/server/libjvm.so", "-ea", "-esa")
 
 -- System.getProperty(key)
 function get_property(key)
