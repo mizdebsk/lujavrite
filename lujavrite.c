@@ -71,7 +71,7 @@ init(lua_State *L)
 
   JavaVM *javaVM;
   jint flag = JNI_CreateJavaVM(&javaVM, (void **)&J, &vmArgs);
-  if (flag == JNI_ERR) {
+  if (flag != JNI_OK) {
     fprintf(stderr, "lujavrite: error: failed to create JVM\n");
     exit(66);
   }
