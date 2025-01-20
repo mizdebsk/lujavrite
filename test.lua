@@ -22,8 +22,12 @@ if java_home == nil then
    java_home = "/usr/lib/jvm/jre"
 end
 
+print("JVM initially initialized? " .. tostring(lujavrite.initialized()))
+
 -- Initialize JVM
 lujavrite.init(java_home .. "/lib/server/libjvm.so", "-ea", "-esa")
+
+print("JVM initialized now? " .. tostring(lujavrite.initialized()))
 
 -- System.getProperty(key)
 function get_property(key)
