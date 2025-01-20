@@ -27,6 +27,20 @@
 static JNIEnv *J;
 
 /**
+ * Determine whether embedded Java Virtual Machine has already been initialized.
+ *
+ * Returns:
+ * - true if JVM has been initialized, false otherwise
+ */
+static int
+initialized(lua_State *L)
+{
+  lua_pushboolean(L, J != NULL);
+  return 1;
+}
+
+
+/**
  * Initialize Java Virtual Machine.
  *
  * dlopen() libjvm.so and call JNI_CreateJavaVM() with specified arguments.
@@ -167,6 +181,7 @@ int
 luaopen_lujavrite(lua_State *L)
 {
   static const struct luaL_Reg functs[] = {
+    {"initialized", initialized},
     {"init", init},
     {"call", call},
     {NULL, NULL},
