@@ -15,6 +15,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#define __USE_GNU 1
 #include <dlfcn.h>
 
 #include <jni.h>
@@ -73,6 +74,20 @@ init(lua_State *L)
   jint flag = JNI_CreateJavaVM(&javaVM, (void **)&J, &vmArgs);
   if (flag != JNI_OK) {
     fprintf(stderr, "lujavrite: error: failed to create JVM\n");
+    exit(66);
+  }
+
+  /* Hack: Now that JVM has been successfully created, lets ensure
+     that lujavrite.so library is not unloaded as we would loose the
+     reference to created JVM and wouldn't be able to interact with it
+     in the future (after lujavrite.so is loaded again). */
+  Dl_info dli;
+  if (!dladdr(&J, &dli)) {
+    fprintf(stderr, "lujavrite: dladdr() failed");
+    exit(66);
+  }
+  if (!dlopen(dli.dli_fname, RTLD_NOW)) {
+    fprintf(stderr, "lujavrite: dlopen(%s) error: %s\n", dli.dli_fname, dlerror());
     exit(66);
   }
 
