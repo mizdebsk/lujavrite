@@ -1,4 +1,4 @@
-[![build status](https://img.shields.io/github/actions/workflow/status/mizdebsk/lujavrite/ci.yml?branch=master)](https://github.com/mizdebsk/lujavrite/actions/workflows/ci.yml?query=branch%3Amaster)
+[![build status](https://img.shields.io/github/actions/workflow/status/mizdebsk/lujavrite/ci.yaml?branch=master)](https://github.com/mizdebsk/lujavrite/actions/workflows/ci.yaml?query=branch%3Amaster)
 [![License](https://img.shields.io/github/license/mizdebsk/lujavrite.svg?label=License)](https://www.apache.org/licenses/LICENSE-2.0)
 
 LuJavRite
