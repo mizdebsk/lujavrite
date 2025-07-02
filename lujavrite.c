@@ -164,6 +164,12 @@ call(lua_State *L)
 
   LL = NULL;
 
+  for (int i = 0; i < n; i++) {
+    if (args[i].l != NULL) {
+      (*J)->DeleteLocalRef(J, args[i].l);
+    }
+  }
+
   if ((*J)->ExceptionCheck(J)) {
     (*J)->ExceptionDescribe(J);
     exit(66);
