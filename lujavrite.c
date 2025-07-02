@@ -25,7 +25,8 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-static JNIEnv *J;
+static JavaVM *JJ;
+static __thread JNIEnv *J;
 static __thread lua_State *LL;
 
 /**
@@ -57,7 +58,7 @@ initialized(lua_State *L)
 static int
 init(lua_State *L)
 {
-  if (J != NULL) {
+  if (JJ != NULL) {
     fprintf(stderr, "lujavrite: error: JVM has already been initialized\n");
     exit(66);
   }
@@ -86,8 +87,7 @@ init(lua_State *L)
   vmArgs.options = jvmopt;
   vmArgs.ignoreUnrecognized = JNI_FALSE;
 
-  JavaVM *javaVM;
-  jint flag = JNI_CreateJavaVM(&javaVM, (void **)&J, &vmArgs);
+  jint flag = JNI_CreateJavaVM(&JJ, (void **)&J, &vmArgs);
   if (flag != JNI_OK) {
     fprintf(stderr, "lujavrite: error: failed to create JVM\n");
     exit(66);
@@ -98,7 +98,7 @@ init(lua_State *L)
      reference to created JVM and wouldn't be able to interact with it
      in the future (after lujavrite.so is loaded again). */
   Dl_info dli;
-  if (!dladdr(&J, &dli)) {
+  if (!dladdr(&JJ, &dli)) {
     fprintf(stderr, "lujavrite: dladdr() failed");
     exit(66);
   }
@@ -127,9 +127,17 @@ init(lua_State *L)
 static int
 call(lua_State *L)
 {
-  if (J == NULL) {
+  if (JJ == NULL) {
     fprintf(stderr, "lujavrite: error: JVM has not been initialized\n");
     exit(66);
+  }
+  if (J == NULL) {
+    if ((*JJ)->GetEnv(JJ, (void **)&J, JNI_VERSION_1_8) != JNI_OK) {
+      if ((*JJ)->AttachCurrentThread(JJ, (void **)&J, NULL) != JNI_OK) {
+        fprintf(stderr, "lujavrite: error: failed to attach current thread to JVM\n");
+        exit(66);
+      }
+    }
   }
   const char *class_name = luaL_checkstring(L, 1);
   const char *method_name = luaL_checkstring(L, 2);
