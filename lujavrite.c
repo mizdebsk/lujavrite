@@ -215,20 +215,33 @@ luaopen_lujavrite(lua_State *L)
 }
 
 
-static void check_lua_state(JNIEnv *J)
+/**
+ * Ensures that the Lua state is present.
+ *
+ * Returns:
+ * - JNI_OK if Lua state is present,
+ * - otherwise JNI_ERR and throws java.lang.RuntimeException.
+ */
+static int
+check_lua_state(JNIEnv *J)
 {
-  (void)J;
   if (LL == NULL) {
-    fprintf(stderr, "lujavrite: unable to call Lua from Java: Lua state is NULL\n");
-    exit(66);
+    jclass class = (*J)->FindClass(J, "java/lang/RuntimeException");
+    assert(class);
+    (*J)->ThrowNew(J, class, "lujavrite: unable to call Lua from Java: Lua state is NULL");
+    return JNI_ERR;
   }
+  return JNI_OK;
 }
+
 
 JNIEXPORT jint JNICALL
 Java_io_kojan_lujavrite_Lua_getglobal(JNIEnv *J, jobject this, jstring name)
 {
   (void)this;
-  check_lua_state(J);
+  if (check_lua_state(J) != JNI_OK) {
+    return 0;
+  }
   const char *name1 = (*J)->GetStringUTFChars(J, name, NULL);
   jint ret = lua_getglobal(LL, name1);
   (*J)->ReleaseStringUTFChars(J, name, name1);
@@ -239,7 +252,9 @@ JNIEXPORT jint JNICALL
 Java_io_kojan_lujavrite_Lua_getfield(JNIEnv *J, jobject this, jint index, jstring name)
 {
   (void)this;
-  check_lua_state(J);
+  if (check_lua_state(J) != JNI_OK) {
+    return 0;
+  }
   const char *name1 = (*J)->GetStringUTFChars(J, name, NULL);
   jint ret = lua_getfield(LL, index, name1);
   (*J)->ReleaseStringUTFChars(J, name, name1);
@@ -250,7 +265,9 @@ JNIEXPORT void JNICALL
 Java_io_kojan_lujavrite_Lua_pushstring(JNIEnv *J, jobject this, jstring string)
 {
   (void)this;
-  check_lua_state(J);
+  if (check_lua_state(J) != JNI_OK) {
+    return;
+  }
   const char *string1 = (*J)->GetStringUTFChars(J, string, NULL);
   (void)lua_pushstring(LL, string1);
   (*J)->ReleaseStringUTFChars(J, string, string1);
@@ -260,7 +277,9 @@ JNIEXPORT jint JNICALL
 Java_io_kojan_lujavrite_Lua_pcall(JNIEnv *J, jobject this, jint nargs, jint nresults, jint msgh)
 {
   (void)this;
-  check_lua_state(J);
+  if (check_lua_state(J) != JNI_OK) {
+    return 0;
+  }
   jint ret = lua_pcall(LL, nargs, nresults, msgh);
   return ret;
 }
@@ -269,7 +288,9 @@ JNIEXPORT jstring JNICALL
 Java_io_kojan_lujavrite_Lua_tostring(JNIEnv *J, jobject this, jint index)
 {
   (void)this;
-  check_lua_state(J);
+  if (check_lua_state(J) != JNI_OK) {
+    return 0;
+  }
   const char *val1 =  lua_tostring(LL, index);
   jstring val = (*J)->NewStringUTF(J, val1);
   return val;
@@ -279,7 +300,9 @@ JNIEXPORT void JNICALL
 Java_io_kojan_lujavrite_Lua_remove(JNIEnv *J, jobject this, jint index)
 {
   (void)this;
-  check_lua_state(J);
+  if (check_lua_state(J) != JNI_OK) {
+    return;
+  }
   lua_remove(LL, index);
 }
 
@@ -287,6 +310,8 @@ JNIEXPORT void JNICALL
 Java_io_kojan_lujavrite_Lua_pop(JNIEnv *J, jobject this, jint n)
 {
   (void)this;
-  check_lua_state(J);
+  if (check_lua_state(J) != JNI_OK) {
+    return;
+  }
   lua_pop(LL, n);
 }
