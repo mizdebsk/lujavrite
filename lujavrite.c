@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 #include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
 #define __USE_GNU 1
 #include <dlfcn.h>
 
@@ -28,6 +26,18 @@
 static JavaVM *JJ;
 static __thread JNIEnv *J;
 static __thread lua_State *LL;
+
+
+static const char *
+dlerror_safe(void)
+{
+  const char *error = dlerror();
+  if (error) {
+    return error;
+  }
+  return "unknown error";
+}
+
 
 /**
  * Determine whether embedded Java Virtual Machine has already been initialized.
@@ -59,20 +69,17 @@ static int
 init(lua_State *L)
 {
   if (JJ != NULL) {
-    fprintf(stderr, "lujavrite: error: JVM has already been initialized\n");
-    exit(66);
+    luaL_error(L, "JVM has already been initialized");
   }
   const char *libjvm_path = luaL_checkstring(L, 1);
   void *libjvm = dlopen(libjvm_path, RTLD_LAZY);
   if (!libjvm) {
-    fprintf(stderr, "lujavrite: dlopen(libjvm.so) error: %s\n", dlerror());
-    exit(66);
+    luaL_error(L, "dlopen(libjvm.so) error: %s", dlerror_safe());
   }
   jint (JNICALL *JNI_CreateJavaVM)(JavaVM **pvm, void **penv, void *args)
     = dlsym(libjvm, "JNI_CreateJavaVM");
   if (!JNI_CreateJavaVM) {
-    fprintf(stderr, "lujavrite: dlsym(JNI_CreateJavaVM) error: %s\n", dlerror());
-    exit(66);
+    luaL_error(L, "dlsym(JNI_CreateJavaVM) error: %s", dlerror_safe());
   }
 
   int n = lua_gettop(L) - 1;
@@ -89,8 +96,7 @@ init(lua_State *L)
 
   jint flag = JNI_CreateJavaVM(&JJ, (void **)&J, &vmArgs);
   if (flag != JNI_OK) {
-    fprintf(stderr, "lujavrite: error: failed to create JVM\n");
-    exit(66);
+    luaL_error(L, "failed to create JVM");
   }
 
   /* Hack: Now that JVM has been successfully created, lets ensure
@@ -99,12 +105,10 @@ init(lua_State *L)
      in the future (after lujavrite.so is loaded again). */
   Dl_info dli;
   if (!dladdr(&JJ, &dli)) {
-    fprintf(stderr, "lujavrite: dladdr() failed");
-    exit(66);
+    luaL_error(L, "dladdr() failed: %s", dlerror_safe());
   }
   if (!dlopen(dli.dli_fname, RTLD_NOW)) {
-    fprintf(stderr, "lujavrite: dlopen(%s) error: %s\n", dli.dli_fname, dlerror());
-    exit(66);
+    luaL_error(L, "dlopen(%s) error: %s", dli.dli_fname, dlerror_safe());
   }
 
   return 0;
@@ -128,14 +132,12 @@ static int
 call(lua_State *L)
 {
   if (JJ == NULL) {
-    fprintf(stderr, "lujavrite: error: JVM has not been initialized\n");
-    exit(66);
+    luaL_error(L, "JVM has not been initialized");
   }
   if (J == NULL) {
     if ((*JJ)->GetEnv(JJ, (void **)&J, JNI_VERSION_1_8) != JNI_OK) {
       if ((*JJ)->AttachCurrentThread(JJ, (void **)&J, NULL) != JNI_OK) {
-        fprintf(stderr, "lujavrite: error: failed to attach current thread to JVM\n");
-        exit(66);
+        luaL_error(L, "failed to attach current thread to JVM");
       }
     }
   }
@@ -146,12 +148,12 @@ call(lua_State *L)
   jclass jcls = (*J)->FindClass(J, class_name);
   if (jcls == NULL) {
     (*J)->ExceptionDescribe(J);
-    exit(66);
+    luaL_error(L, "unable to find the Java class to call");
   }
   jmethodID methodId = (*J)->GetStaticMethodID(J, jcls, method_name, method_signature);
   if (methodId == NULL) {
     (*J)->ExceptionDescribe(J);
-    exit(66);
+    luaL_error(L, "unable to find the Java method to call");
   }
 
   int n = lua_gettop(L) - 3;
@@ -180,7 +182,7 @@ call(lua_State *L)
 
   if ((*J)->ExceptionCheck(J)) {
     (*J)->ExceptionDescribe(J);
-    exit(66);
+    luaL_error(L, "exception was thrown from called Java code");
   }
 
   if ((*J)->IsSameObject(J, ret, NULL)) {
