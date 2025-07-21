@@ -31,3 +31,9 @@ set(LUA "lua" CACHE STRING "Lua interpreter to use in tests")
 add_test(NAME test_lua
     COMMAND ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test.lua
 )
+
+include(GNUInstallDirs)
+
+install(TARGETS lujavrite
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/lua/${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}"
+)
