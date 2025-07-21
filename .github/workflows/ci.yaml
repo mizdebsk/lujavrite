@@ -15,7 +15,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Install dependencies
         run: sudo apt install lua5.4 liblua5.4-dev
-      - name: Compile
-        run: ./build.sh
-      - name: Run tests
-        run: lua5.4 test.lua
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+      - name: Build
+        run: make -C build
+      - name: Test
+        run: LUA_CPATH='build/?.so' lua5.4 test.lua
