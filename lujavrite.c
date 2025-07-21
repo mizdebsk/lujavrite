@@ -36,7 +36,8 @@ dlerror_safe(void)
 }
 
 /**
- * Determine whether embedded Java Virtual Machine has already been initialized.
+ * Determine whether an embedded Java Virtual Machine has already been
+ * initialized.
  *
  * Returns:
  * - true if JVM has been initialized, false otherwise
@@ -54,8 +55,8 @@ initialized(lua_State *L)
  * dlopen() libjvm.so and call JNI_CreateJavaVM() with specified arguments.
  *
  * Parameters:
- * - path to libjvm.so, eg. /usr/lib/jvm/java-17-openjdk/lib/server/libjvm.so
- * - zero or more arguments passed to JVM - eg. -Djava.class.path=...
+ * - path to libjvm.so, e.g., /usr/lib/jvm/java-17-openjdk/lib/server/libjvm.so
+ * - zero or more arguments passed to JVM - e.g., -Djava.class.path=...
  *
  * Returns:
  * - nothing
@@ -94,8 +95,8 @@ init(lua_State *L)
         luaL_error(L, "failed to create JVM");
     }
 
-    /* Hack: Now that JVM has been successfully created, lets ensure
-       that lujavrite.so library is not unloaded as we would loose the
+    /* Hack: Now that JVM has been successfully created, let's ensure
+       that lujavrite.so library is not unloaded as we would lose the
        reference to created JVM and wouldn't be able to interact with it
        in the future (after lujavrite.so is loaded again). */
     Dl_info dli;
@@ -110,13 +111,13 @@ init(lua_State *L)
 }
 
 /**
- * Call static Java function that accepts zero or more String argument
+ * Call a static Java function that accepts zero or more String argument
  * and returns String.
  *
  * Parameters:
- * - class name, eg. "com/mycompany/MyClass"
- * - method name, eg. "myMethod"
- * - method signature, eg. "(Ljava/lang/String;)Ljava/lang/String;"
+ * - class name, e.g. "com/mycompany/MyClass"
+ * - method name, e.g., "myMethod"
+ * - method signature, e.g., "(Ljava/lang/String;)Ljava/lang/String;"
  * - zero or more string arguments
  *
  * Returns:
@@ -193,7 +194,7 @@ call(lua_State *L)
 
 /**
  * Register lua module.
- * Called by Lua when loading library.
+ * Called by Lua when loading the library.
  */
 int
 luaopen_lujavrite(lua_State *L)
