@@ -20,3 +20,11 @@ set_target_properties(lujavrite PROPERTIES
     OUTPUT_NAME "lujavrite"
     PREFIX ""
 )
+
+enable_testing()
+
+set(LUA "lua" CACHE STRING "Lua interpreter to use in tests")
+
+add_test(NAME test_lua
+    COMMAND ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test.lua
+)
