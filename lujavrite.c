@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include <assert.h>
-#define __USE_GNU 1
 #include <dlfcn.h>
 
 #include <jni.h>
