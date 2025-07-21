@@ -128,6 +128,7 @@ call(lua_State *L)
     if (JJ == NULL) {
         luaL_error(L, "JVM has not been initialized");
     }
+    assert(JJ);
     if (J == NULL) {
         if ((*JJ)->GetEnv(JJ, (void **)&J, JNI_VERSION_1_8) != JNI_OK) {
             if ((*JJ)->AttachCurrentThread(JJ, (void **)&J, NULL) != JNI_OK) {
