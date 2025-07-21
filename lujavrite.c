@@ -20,7 +20,6 @@
 
 #include <lauxlib.h>
 #include <lua.h>
-#include <lualib.h>
 
 static JavaVM *JJ;
 static __thread JNIEnv *J;
