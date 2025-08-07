@@ -24,6 +24,8 @@ set_target_properties(lujavrite PROPERTIES
         PREFIX ""
 )
 
+target_link_libraries(lujavrite PRIVATE ${LUA_LIBRARIES})
+
 enable_testing()
 
 set(LUA "lua" CACHE STRING "Lua interpreter to use in tests")
